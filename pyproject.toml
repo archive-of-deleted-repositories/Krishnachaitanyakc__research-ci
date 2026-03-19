@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autoresearch-ci"
+version = "0.1.0"
+description = "GitHub Actions integration for continuous research on every push"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+autoresearch-ci = "autoresearch_ci.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
