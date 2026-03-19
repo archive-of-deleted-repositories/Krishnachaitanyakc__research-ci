@@ -23,12 +23,25 @@ def cli():
               help="Path to autoresearch-ci.yaml config file")
 @click.option("--output-dir", type=click.Path(), default=".github/workflows",
               help="Output directory for workflow YAML")
-def init(config_file, output_dir):
+@click.option("--template", type=click.Choice(["ml_training", "hyperparameter_sweep", "evaluation_only"]),
+              default=None, help="Workflow template to use")
+@click.option("--domain", default=None, help="Research domain for domain-specific steps")
+def init(config_file, output_dir, template, domain):
     """Generate GitHub Actions workflow YAML."""
     if config_file and os.path.exists(config_file):
         config = CIConfig.from_file(config_file)
     else:
         config = CIConfig()
+
+    if template:
+        config.template = template
+
+    if domain:
+        try:
+            from autoresearch_ci.domains_integration import apply_domain_config
+            config = apply_domain_config(config, domain)
+        except ImportError:
+            click.echo(f"Warning: autoresearch-domains not available, --domain ignored")
 
     generator = ActionGenerator()
     workflow = generator.generate_workflow(config)
@@ -84,6 +97,19 @@ def validate(config_file):
     config = CIConfig.from_file(config_file)
     errors = config.validate()
 
+    if config.cost_budget_dollars is not None:
+        from autoresearch_ci.cost_tracker import estimate_cost
+        provider = "github_actions"
+        if "gpu" in config.runner.lower() or "self-hosted" in config.runner.lower():
+            provider = "modal"
+        estimated = estimate_cost(provider, config.gpu_type, config.time_budget_hours, config.gpu_count)
+        if estimated > config.cost_budget_dollars:
+            errors.append(
+                f"Estimated cost ${estimated:.2f} exceeds budget ${config.cost_budget_dollars:.2f}"
+            )
+        else:
+            click.echo(f"Estimated cost: ${estimated:.2f} (budget: ${config.cost_budget_dollars:.2f})")
+
     if errors:
         click.echo("Configuration errors:")
         for err in errors:
@@ -91,3 +117,62 @@ def validate(config_file):
         raise SystemExit(1)
     else:
         click.echo("Configuration is valid.")
+
+
+@cli.command(name="cost-report")
+@click.argument("log_files", nargs=-1, type=click.Path(exists=True))
+@click.option("--provider", default="modal", help="Cloud provider name")
+@click.option("--gpu-type", default="A100", help="GPU type used")
+def cost_report(log_files, provider, gpu_type):
+    """Generate cost report from runner logs."""
+    from autoresearch_ci.cost_tracker import (
+        CostReport, CostEntry, estimate_cost, parse_gpu_time_from_log
+    )
+
+    report = CostReport()
+    for log_file in log_files:
+        with open(log_file) as f:
+            log_text = f.read()
+        gpu_hours = parse_gpu_time_from_log(log_text)
+        if gpu_hours is None:
+            click.echo(f"Warning: Could not parse GPU time from {log_file}")
+            continue
+        cost = estimate_cost(provider, gpu_type, gpu_hours)
+        report.entries.append(CostEntry(
+            provider=provider,
+            gpu_type=gpu_type,
+            gpu_hours=gpu_hours,
+            cost_dollars=cost,
+            experiment_name=os.path.basename(log_file),
+        ))
+
+    click.echo(report.to_markdown())
+
+
+@cli.command()
+@click.argument("dag_file", type=click.Path(exists=True))
+@click.option("--runner", default="ubuntu-latest", help="GitHub Actions runner")
+@click.option("--output", type=click.Path(), default=None, help="Output workflow file")
+def dag(dag_file, runner, output):
+    """Generate workflow from experiment dependency graph."""
+    from autoresearch_ci.dag import load_dag_from_yaml, validate_dag, generate_github_actions_dag
+
+    with open(dag_file) as f:
+        dag_data = load_dag_from_yaml(f.read())
+
+    errors = validate_dag(dag_data)
+    if errors:
+        click.echo("DAG validation errors:")
+        for err in errors:
+            click.echo(f"  - {err}")
+        raise SystemExit(1)
+
+    workflow = generate_github_actions_dag(dag_data, runner)
+
+    if output:
+        os.makedirs(os.path.dirname(output) or ".", exist_ok=True)
+        with open(output, "w") as f:
+            f.write(workflow)
+        click.echo(f"DAG workflow written to: {output}")
+    else:
+        click.echo(workflow)

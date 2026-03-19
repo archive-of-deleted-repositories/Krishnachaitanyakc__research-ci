@@ -70,3 +70,60 @@ class TestActionGenerator:
         workflow = self.gen.generate_workflow(config)
         assert "torch" in workflow
         assert "transformers" in workflow
+
+    def test_hyperparameter_sweep_template(self):
+        config = CIConfig(template="hyperparameter_sweep")
+        workflow = self.gen.generate_workflow(config)
+        parsed = yaml.safe_load(workflow)
+        assert "sweep" in parsed["jobs"]
+        assert "matrix" in str(workflow)
+        assert "learning_rate" in str(workflow)
+        assert "batch_size" in str(workflow)
+
+    def test_evaluation_only_template(self):
+        config = CIConfig(template="evaluation_only")
+        workflow = self.gen.generate_workflow(config)
+        parsed = yaml.safe_load(workflow)
+        assert "evaluate" in parsed["jobs"]
+        assert "Run training" not in workflow
+        assert "Run evaluation" in workflow
+
+    def test_ml_training_is_default_template(self):
+        config = CIConfig()
+        workflow = self.gen.generate_workflow(config)
+        assert "Run training" in workflow
+
+    def test_slack_webhook_notification(self):
+        config = CIConfig(notify=["slack_webhook"])
+        workflow = self.gen.generate_workflow(config)
+        assert "Notify via webhook" in workflow
+        assert "WEBHOOK_URL" in workflow
+
+    def test_both_notifications(self):
+        config = CIConfig(notify=["github_comment", "slack_webhook"])
+        workflow = self.gen.generate_workflow(config)
+        assert "Comment on PR" in workflow
+        assert "Notify via webhook" in workflow
+
+    def test_multi_gpu_matrix(self):
+        config = CIConfig(gpu_count=4)
+        workflow = self.gen.generate_workflow(config)
+        assert "gpu_index" in workflow
+        assert "[0, 1, 2, 3]" in workflow
+
+    def test_single_gpu_no_matrix(self):
+        config = CIConfig(gpu_count=1)
+        workflow = self.gen.generate_workflow(config)
+        assert "gpu_index" not in workflow
+
+    def test_retry_config(self):
+        config = CIConfig(max_retries=3, retry_delay=30)
+        workflow = self.gen.generate_workflow(config)
+        assert "max_retries=3" in workflow
+        assert "retry" in workflow.lower()
+        assert "sleep 30" in workflow
+
+    def test_no_retry_by_default(self):
+        config = CIConfig()
+        workflow = self.gen.generate_workflow(config)
+        assert "max_retries" not in workflow

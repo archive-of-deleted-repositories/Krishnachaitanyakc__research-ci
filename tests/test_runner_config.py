@@ -50,3 +50,26 @@ class TestRunnerConfig:
         config = CIConfig(python_version="3.12")
         script = self.runner.generate_modal_config(config)
         assert "3.12" in script
+
+    def test_modal_multi_gpu(self):
+        config = CIConfig(gpu_count=4, gpu_type="A100")
+        script = self.runner.generate_modal_config(config)
+        assert "count=4" in script
+        assert "A100" in script
+
+    def test_modal_single_gpu_type(self):
+        config = CIConfig(gpu_count=1, gpu_type="H100")
+        script = self.runner.generate_modal_config(config)
+        assert "H100" in script
+        assert "count=" not in script
+
+    def test_runpod_multi_gpu(self):
+        config = CIConfig(gpu_count=2, gpu_type="A100")
+        script = self.runner.generate_runpod_config(config)
+        assert "GPU_COUNT=2" in script
+        assert "GPU_TYPE=A100" in script
+
+    def test_runpod_single_gpu_no_env(self):
+        config = CIConfig(gpu_count=1)
+        script = self.runner.generate_runpod_config(config)
+        assert "GPU_COUNT" not in script

@@ -11,10 +11,12 @@ requires-python = ">=3.9"
 dependencies = [
     "click>=8.0",
     "pyyaml>=6.0",
+    "scipy>=1.10",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
+domains = ["autoresearch-domains"]
 
 [project.scripts]
 autoresearch-ci = "autoresearch_ci.cli:cli"
