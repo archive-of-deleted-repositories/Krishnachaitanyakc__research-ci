@@ -1,8 +1,8 @@
-"""Optional integration with autoresearch-domains."""
+"""Optional integration with research-domains."""
 
 from __future__ import annotations
 
-from autoresearch_ci.config import CIConfig
+from research_ci.config import CIConfig
 
 
 DOMAIN_DEFAULTS = {
@@ -28,12 +28,12 @@ DOMAIN_DEFAULTS = {
 def detect_domain(project_path: str) -> str | None:
     """Try to auto-detect the research domain from project files.
 
-    Attempts to import autoresearch-domains for detection.
+    Attempts to import research-domains for detection.
     Falls back to None if not available.
     """
     try:
-        import autoresearch_domains
-        return autoresearch_domains.detect_domain(project_path)
+        import research_domains
+        return research_domains.detect_domain(project_path)
     except (ImportError, AttributeError):
         return None
 

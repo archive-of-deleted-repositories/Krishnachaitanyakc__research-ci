@@ -2,7 +2,7 @@
 
 import pytest
 
-from autoresearch_ci.leaderboard_builder import LeaderboardBuilder, BranchResult
+from research_ci.leaderboard_builder import LeaderboardBuilder, BranchResult
 
 
 class TestLeaderboardBuilder:

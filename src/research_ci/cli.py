@@ -1,4 +1,4 @@
-"""CLI for autoresearch-ci."""
+"""CLI for research-ci."""
 
 from __future__ import annotations
 
@@ -7,10 +7,10 @@ import os
 
 import click
 
-from autoresearch_ci.config import CIConfig
-from autoresearch_ci.action_generator import ActionGenerator
-from autoresearch_ci.result_commenter import ResultCommenter
-from autoresearch_ci.leaderboard_builder import LeaderboardBuilder
+from research_ci.config import CIConfig
+from research_ci.action_generator import ActionGenerator
+from research_ci.result_commenter import ResultCommenter
+from research_ci.leaderboard_builder import LeaderboardBuilder
 
 
 @click.group()
@@ -20,7 +20,7 @@ def cli():
 
 @cli.command()
 @click.option("--config", "config_file", type=click.Path(), default=None,
-              help="Path to autoresearch-ci.yaml config file")
+              help="Path to research-ci.yaml config file")
 @click.option("--output-dir", type=click.Path(), default=".github/workflows",
               help="Output directory for workflow YAML")
 @click.option("--template", type=click.Choice(["ml_training", "hyperparameter_sweep", "evaluation_only"]),
@@ -38,10 +38,10 @@ def init(config_file, output_dir, template, domain):
 
     if domain:
         try:
-            from autoresearch_ci.domains_integration import apply_domain_config
+            from research_ci.domains_integration import apply_domain_config
             config = apply_domain_config(config, domain)
         except ImportError:
-            click.echo(f"Warning: autoresearch-domains not available, --domain ignored")
+            click.echo(f"Warning: research-domains not available, --domain ignored")
 
     generator = ActionGenerator()
     workflow = generator.generate_workflow(config)
@@ -98,7 +98,7 @@ def validate(config_file):
     errors = config.validate()
 
     if config.cost_budget_dollars is not None:
-        from autoresearch_ci.cost_tracker import estimate_cost
+        from research_ci.cost_tracker import estimate_cost
         provider = "github_actions"
         if "gpu" in config.runner.lower() or "self-hosted" in config.runner.lower():
             provider = "modal"
@@ -125,7 +125,7 @@ def validate(config_file):
 @click.option("--gpu-type", default="A100", help="GPU type used")
 def cost_report(log_files, provider, gpu_type):
     """Generate cost report from runner logs."""
-    from autoresearch_ci.cost_tracker import (
+    from research_ci.cost_tracker import (
         CostReport, CostEntry, estimate_cost, parse_gpu_time_from_log
     )
 
@@ -155,7 +155,7 @@ def cost_report(log_files, provider, gpu_type):
 @click.option("--output", type=click.Path(), default=None, help="Output workflow file")
 def dag(dag_file, runner, output):
     """Generate workflow from experiment dependency graph."""
-    from autoresearch_ci.dag import load_dag_from_yaml, validate_dag, generate_github_actions_dag
+    from research_ci.dag import load_dag_from_yaml, validate_dag, generate_github_actions_dag
 
     with open(dag_file) as f:
         dag_data = load_dag_from_yaml(f.read())

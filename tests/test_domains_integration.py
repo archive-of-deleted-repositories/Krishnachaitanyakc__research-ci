@@ -2,8 +2,8 @@
 
 import pytest
 
-from autoresearch_ci.config import CIConfig
-from autoresearch_ci.domains_integration import apply_domain_config, detect_domain
+from research_ci.config import CIConfig
+from research_ci.domains_integration import apply_domain_config, detect_domain
 
 
 class TestApplyDomainConfig:

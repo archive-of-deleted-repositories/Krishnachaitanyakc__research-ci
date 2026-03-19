@@ -1,4 +1,4 @@
-# autoresearch-ci
+# research-ci
 
 GitHub Actions integration for continuous research on every push. Generates workflow files, builds leaderboards from experiment branches, and creates PR comments with experiment results.
 
@@ -22,23 +22,23 @@ pip install -e ".[dev]"
 
 ```bash
 # Generate workflow YAML
-autoresearch-ci init
+research-ci init
 
 # Build leaderboard from experiment branches
-autoresearch-ci leaderboard /path/to/repo
+research-ci leaderboard /path/to/repo
 
 # Generate PR comment from results
-autoresearch-ci comment results.json
+research-ci comment results.json
 
 # Validate CI config
-autoresearch-ci validate autoresearch-ci.yaml
+research-ci validate research-ci.yaml
 ```
 
 ### Python API
 
 ```python
-from autoresearch_ci.action_generator import ActionGenerator
-from autoresearch_ci.config import CIConfig
+from research_ci.action_generator import ActionGenerator
+from research_ci.config import CIConfig
 
 config = CIConfig(runner="self-hosted-gpu", time_budget_hours=4)
 generator = ActionGenerator()

@@ -6,7 +6,7 @@
 - Workflow templates for different experiment types
 
 ## Medium Term
-- Integration with autoresearch-domains for domain-specific workflows
+- Integration with research-domains for domain-specific workflows
 - Automatic experiment scheduling based on cost budgets
 - Result comparison across branches with statistical significance
 

@@ -6,7 +6,7 @@ import tempfile
 
 from click.testing import CliRunner
 
-from autoresearch_ci.cli import cli
+from research_ci.cli import cli
 
 
 class TestCLI:

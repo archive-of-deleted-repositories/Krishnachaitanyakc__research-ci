@@ -2,7 +2,7 @@
 
 import pytest
 
-from autoresearch_ci.result_commenter import ResultCommenter
+from research_ci.result_commenter import ResultCommenter
 
 
 class TestResultCommenter:

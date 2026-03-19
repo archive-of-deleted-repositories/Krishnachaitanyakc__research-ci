@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from autoresearch_ci.config import CIConfig
+from research_ci.config import CIConfig
 
 
 class ActionGenerator:

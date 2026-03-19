@@ -2,7 +2,7 @@
 
 import pytest
 
-from autoresearch_ci.config import CIConfig
+from research_ci.config import CIConfig
 
 
 class TestCIConfig:

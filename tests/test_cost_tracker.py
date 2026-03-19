@@ -2,7 +2,7 @@
 
 import pytest
 
-from autoresearch_ci.cost_tracker import (
+from research_ci.cost_tracker import (
     estimate_cost,
     parse_gpu_time_from_log,
     CostEntry,

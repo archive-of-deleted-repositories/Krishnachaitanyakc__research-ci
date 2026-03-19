@@ -2,8 +2,8 @@
 
 import pytest
 
-from autoresearch_ci.config import CIConfig
-from autoresearch_ci.runner_config import RunnerConfig
+from research_ci.config import CIConfig
+from research_ci.runner_config import RunnerConfig
 
 
 class TestRunnerConfig:

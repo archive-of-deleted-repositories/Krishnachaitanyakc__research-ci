@@ -2,7 +2,7 @@
 
 import pytest
 
-from autoresearch_ci.significance import (
+from research_ci.significance import (
     compute_significance,
     format_significance_comment,
     SignificanceResult,

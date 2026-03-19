@@ -3,8 +3,8 @@
 import yaml
 import pytest
 
-from autoresearch_ci.config import CIConfig
-from autoresearch_ci.action_generator import ActionGenerator
+from research_ci.config import CIConfig
+from research_ci.action_generator import ActionGenerator
 
 
 class TestActionGenerator:

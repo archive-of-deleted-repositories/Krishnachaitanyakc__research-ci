@@ -3,7 +3,7 @@
 import pytest
 import yaml
 
-from autoresearch_ci.dag import (
+from research_ci.dag import (
     load_dag_from_yaml,
     validate_dag,
     topological_sort,
